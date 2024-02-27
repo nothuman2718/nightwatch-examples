@@ -10,6 +10,9 @@ test('getShadowRoot() example test', async function (browser) {
   const iconElement = await shadowRootEl.find('.icon');
   const firstElement = await browser.getFirstElementChild(iconElement);
 
+  // Added pause because, this will become flaky test if not
+  await browser.pause(100); // The firstElement is taking some time to getFirstElementChild
+
   await expect.element(firstElement).to.be.an('img');
 
 });

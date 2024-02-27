@@ -1,30 +1,42 @@
 describe('.windowHandles() example test', function () {
 
-  beforeEach(browser => browser.navigateTo('https://nightwatchjs.org/__e2e/window/'));
+  beforeEach(browser => browser.url('https://example.com'));
+
   afterEach(browser => browser.end());
 
-  it('basic window test', function (browser) {
-    browser
-      .windowHandles(res => {
-        browser.assert.equal(res.value.length, 1);
+  it('opens a new window when clicking a link', async function (browser) {
+
+    await browser
+      .windowHandles(result => {
+        browser.assert.equal(result.value.length, 1);
       })
-      .click('#openWindowBttn')
-      .windowHandles(res => {
-        browser.assert.equal(res.value.length, 2);
+      .execute(function () {
+        document.querySelector('a[href="https://www.iana.org/domains/example"]').target = '_blank'; // Link to another page
+      })
+      .click('a[href="https://www.iana.org/domains/example"]')
+      .windowHandles(result => {
+        browser.assert.equal(result.value.length, 2);
       })
       .windowHandles(function (result) {
         console.log('result:', result);
       });
   });
 
-  it('async window test', async function (browser) {
-    await browser.click('#openWindowBttn');
+  it('can interact with elements in the new window', async function (browser) {
 
-    let windowHandles = await browser.windowHandles();
-    browser.assert.equal(windowHandles.length, 2);
-
-    await browser.switchWindow(windowHandles[1]);
-    await browser.waitForElementVisible('form');
+    await browser
+      .execute(function () {
+        document.querySelector('a[href="https://www.iana.org/domains/example"]').target = '_blank'; // Link to another page
+      })
+      .click('a[href="https://www.iana.org/domains/example"]')
+      .windowHandles(result => {
+        browser.assert.equal(result.value.length, 2);
+      })
+      .windowHandles(function (result) {
+        console.log('result:', result);
+        this.switchWindow(result.value[1])
+      })
+      .waitForElementVisible('#header')
+      .assert.visible('#header');
   });
 });
-
